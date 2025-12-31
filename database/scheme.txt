@@ -1,0 +1,22 @@
+-- Tabela słownikowa produktów
+CREATE TABLE products (
+    product_id SERIAL PRIMARY KEY,
+    ean VARCHAR(13) UNIQUE,
+    brand VARCHAR(100),
+    name VARCHAR(255),
+    category VARCHAR(100),
+    base_unit VARCHAR(10), -- ml, g, szt
+    base_volume FLOAT      -- np. 50, 100
+);
+
+-- Tabela faktów (ceny)
+CREATE TABLE price_log (
+    log_id SERIAL PRIMARY KEY,
+    product_id INTEGER REFERENCES products(product_id),
+    shop_name VARCHAR(50),
+    raw_price FLOAT,          -- cena widoczna na stronie
+    effective_price FLOAT,    -- cena po Twoich wyliczeniach (np. z 2+1)
+    promo_desc TEXT,          -- surowy tekst promocji (do regexa)
+    is_promo BOOLEAN,
+    scraped_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
