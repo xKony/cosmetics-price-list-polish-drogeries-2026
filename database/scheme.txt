@@ -7,6 +7,7 @@ CREATE TABLE products (
     category VARCHAR(100),
     base_unit VARCHAR(10), -- ml, g, szt
     base_volume FLOAT      -- np. 50, 100
+    ingredients VARCHAR(1500)
 );
 
 -- Tabela faktów (ceny)
@@ -18,5 +19,6 @@ CREATE TABLE price_log (
     effective_price FLOAT,    -- cena po Twoich wyliczeniach (np. z 2+1)
     promo_desc TEXT,          -- surowy tekst promocji (do regexa)
     is_promo BOOLEAN,
+    reviews FLOAT -- ocena np. 2.5/5 gwiazdek
     scraped_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

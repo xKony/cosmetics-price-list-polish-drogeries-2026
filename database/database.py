@@ -1,10 +1,12 @@
 import sqlite3
+from utils.logger import get_logger
 
 
 class PriceDatabase:
     def __init__(self, db_name="prices.db"):
         self.db_name = db_name
         self.init_db()
+        self.log = get_logger(__name__)
 
     def _get_connection(self):
         # Enabling foreign_keys is crucial in SQLite

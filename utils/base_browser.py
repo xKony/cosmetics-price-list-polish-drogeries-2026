@@ -8,15 +8,14 @@ from fake_useragent import UserAgent
 from config import HEADLESS_BROWSER
 from utils.logger import get_logger
 
-log = get_logger(__name__)
-
 
 class BaseBrowser:
     def __init__(self):
-        self.headless = HEADLESS_BROWSER
-        self.ua_generator = UserAgent()
+        self.headless: bool = HEADLESS_BROWSER
+        self.ua_generator: UserAgent = UserAgent()
         self.browser: Optional[uc.Browser] = None
         self.user_data_dir = None
+        self.log = get_logger(__name__)
         # Default resolutions list (Width, Height)
         self.resolutions: List[Tuple[int, int]] = [
             (1920, 1080),
@@ -64,7 +63,7 @@ class BaseBrowser:
 
         args = self._generate_browser_args(w, h, user_agent)
 
-        log.info("Starting Browser with randomized fingerprint...")
+        self.log.info("Starting Browser with randomized fingerprint...")
         self.browser = await uc.start(
             browser_args=args, headless=self.headless, lang=lang
         )
@@ -76,14 +75,14 @@ class BaseBrowser:
                 self.user_data_dir = self.browser.config.user_data_dir
                 self.browser.stop()
                 await asyncio.sleep(1.5)
-                log.debug("Browser process stopped.")
+                self.log.debug("Browser process stopped.")
                 if self.user_data_dir and os.path.exists(self.user_data_dir):
                     try:
                         shutil.rmtree(self.user_data_dir, ignore_errors=True)
-                        log.debug(f"Cleaned up temp profile: {self.user_data_dir}")
+                        self.log.debug(f"Cleaned up temp profile: {self.user_data_dir}")
                     except Exception as e:
-                        log.warning(f"Could not delete temp dir: {e}")
+                        self.log.warning(f"Could not delete temp dir: {e}")
             except Exception as e:
-                log.error(f"Error during browser shutdown: {e}")
+                self.log.error(f"Error during browser shutdown: {e}")
             finally:
                 self.browser = None
