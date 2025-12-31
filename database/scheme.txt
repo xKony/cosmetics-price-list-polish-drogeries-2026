@@ -7,7 +7,6 @@ CREATE TABLE products (
     category VARCHAR(100),
     base_unit VARCHAR(10), -- ml, g, szt
     base_volume FLOAT      -- np. 50, 100
-    ingredients VARCHAR(1500)
 );
 
 -- Tabela faktów (ceny)

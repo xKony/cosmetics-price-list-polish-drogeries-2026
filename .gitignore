@@ -1,2 +1,4 @@
 logs
 __pycache__
+prices.db
+urls

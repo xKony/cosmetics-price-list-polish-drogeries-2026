@@ -66,11 +66,19 @@ class PriceDatabase:
                 cursor.execute("SELECT product_id FROM products WHERE ean = ?", (ean,))
                 return cursor.fetchone()[0]
 
-    def log_price(self, product_id, shop, raw, effective, desc, is_promo):
+    def log_price(self, product_id, shop, raw_price, effective_price, desc, is_promo):
         """Logs a price entry."""
         sql = """INSERT INTO price_log (product_id, shop_name, raw_price, effective_price, promo_desc, is_promo)
                  VALUES (?, ?, ?, ?, ?, ?)"""
         with self._get_connection() as conn:
             conn.execute(
-                sql, (product_id, shop, raw, effective, desc, 1 if is_promo else 0)
+                sql,
+                (
+                    product_id,
+                    shop,
+                    raw_price,
+                    effective_price,
+                    desc,
+                    1 if is_promo else 0,
+                ),
             )
