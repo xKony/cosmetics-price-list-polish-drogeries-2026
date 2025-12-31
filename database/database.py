@@ -42,7 +42,8 @@ class PriceDatabase:
                     product_id INTEGER,
                     shop_name TEXT,
                     raw_price REAL,
-                    effective_price REAL,
+                    last_30d_price REAL,
+                    review_ratings REAL,
                     promo_desc TEXT,
                     is_promo INTEGER, -- SQLite uses 0/1 for BOOLEAN
                     scraped_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -66,10 +67,12 @@ class PriceDatabase:
                 cursor.execute("SELECT product_id FROM products WHERE ean = ?", (ean,))
                 return cursor.fetchone()[0]
 
-    def log_price(self, product_id, shop, raw_price, effective_price, desc, is_promo):
+    def log_price(
+        self, product_id, shop, raw_price, last_30d_price, ratings, desc, is_promo
+    ):
         """Logs a price entry."""
-        sql = """INSERT INTO price_log (product_id, shop_name, raw_price, effective_price, promo_desc, is_promo)
-                 VALUES (?, ?, ?, ?, ?, ?)"""
+        sql = """INSERT INTO price_log (product_id, shop_name, raw_price, last_30d_price, review_ratings, promo_desc, is_promo)
+                 VALUES (?, ?, ?, ?, ?, ?, ?)"""
         with self._get_connection() as conn:
             conn.execute(
                 sql,
@@ -77,7 +80,8 @@ class PriceDatabase:
                     product_id,
                     shop,
                     raw_price,
-                    effective_price,
+                    last_30d_price,
+                    ratings,
                     desc,
                     1 if is_promo else 0,
                 ),

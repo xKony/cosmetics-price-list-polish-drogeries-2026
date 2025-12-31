@@ -2,13 +2,11 @@ import os
 import time
 import re
 import curl_cffi.requests as requests
-from typing import Set, Tuple
+from typing import Set, Tuple, Optional, Match
 from bs4 import BeautifulSoup
 from utils.base_scraper import BaseScraper
 from config import NOTINO_URL, MAX_PRODUCTS
-from database.database import (
-    PriceDatabase,
-)  # Assuming database.py is in the python path
+from database.database import PriceDatabase
 
 
 class NotinoScraper(BaseScraper):
@@ -16,9 +14,9 @@ class NotinoScraper(BaseScraper):
         # Initialize parent class
         super().__init__()
         # Configuration specific to Notino
-        self.base_url = NOTINO_URL
-        self.output_dir = "scrapers/urls/"
-        self.output_file = "notino_products.txt"
+        self.base_url: str = NOTINO_URL
+        self.output_dir: str = "scrapers/urls/"
+        self.output_file: str = "notino_products.txt"
         self.product_links: Set[str] = set()
 
         # Initialize Database
@@ -35,9 +33,9 @@ class NotinoScraper(BaseScraper):
             return 0.0
         self.log.debug("Cena minimalna before cleaning: " + price_str)
         # Remove anything that isn't a digit or a comma
-        clean = re.sub(r"[^\d,]", "", price_str)
+        clean: str = re.sub(r"[^\d,]", "", price_str)
         # Replace decimal comma with dot
-        clean = clean.replace(",", ".")
+        clean: str = clean.replace(",", ".")
         try:
             self.log.debug(f"Clean cena minimalna: {clean}")
             return float(clean)
@@ -54,10 +52,10 @@ class NotinoScraper(BaseScraper):
             return 0.0, "N/A"
 
         # Regex to find number (handling comma decimals) and unit
-        match = re.search(r"(\d+(?:,\d+)?)\s*([a-zA-Z]+)", text)
+        match: Optional[Match[str]] = re.search(r"(\d+(?:,\d+)?)\s*([a-zA-Z]+)", text)
         if match:
-            vol_str = match.group(1).replace(",", ".")
-            unit = match.group(2)
+            vol_str: str = match.group(1).replace(",", ".")
+            unit: str = match.group(2)
             try:
                 return float(vol_str), unit
             except ValueError:
@@ -80,8 +78,8 @@ class NotinoScraper(BaseScraper):
         for page in range(1, 501):
             # Construct URL based on the pattern provided
             # Page 1: ?f=1-1-2-3645, Page N: ?f={N}-1-2-3645
-            query_param = f"?f={page}-9-2-3645"
-            target_url = f"{self.base_url}{query_param}"
+            query_param: str = f"?f={page}-9-2-3645"
+            target_url: str = f"{self.base_url}{query_param}"
 
             self.log.info(f"Scraping Page {page}: {target_url}")
             if len(self.product_links) > MAX_PRODUCTS:
@@ -129,9 +127,9 @@ class NotinoScraper(BaseScraper):
                     )
                     break
 
-                page_new_links = 0
+                page_new_links: int = 0
                 for item in items:
-                    link = str(item["href"])
+                    link: str = str(item["href"])
                     # Normalize link (handle relative paths if necessary)
                     if link.startswith("/"):
                         link = f"https://www.notino.pl{link}"
@@ -198,39 +196,76 @@ class NotinoScraper(BaseScraper):
         Parses the product page soup, determines if it's single or multi variant,
         and saves data to DB.
         """
-        # 1. Extract Common Data (Brand/Name)
-        h1 = soup.find("h1")
-        full_name = h1.get_text(strip=False) if h1 else "Unknown Product"
-        self.log.debug("Full product name: " + full_name)
-        # Simple heuristic: Split H1 for Brand, or use meta tags if available
-        # Requirement says "Extract Brand/Name from <h1>"
-        brand = "Notino Selection"  # Default
-        name = full_name
+        # 1. Extract Brand/Name from <h1>
+        # Structure: <h1 data-testid="pd-header-title">...<a>Brand</a><span>Name</span>...</h1>
+        h1 = soup.find("h1", {"data-testid": "pd-header-title"})
+        if h1:
+            brand_link = h1.find("a")
+            brand: str = brand_link.get_text(strip=True) if brand_link else "Notino Selection"
+            # Name is in the first span after the brand link
+            name_span = (
+                brand_link.find_next_sibling("span") if brand_link else h1.find("span")
+            )
+            name: str = name_span.get_text(strip=True) if name_span else "Unknown Product"
+        else:
+            # Fallback to general h1 or meta
+            h1_fallback = soup.find("h1")
+            name = h1_fallback.get_text(strip=True) if h1_fallback else "Unknown Product"
+            brand = "Notino Selection"
+            brand_meta = soup.find("meta", attrs={"itemprop": "brand"})
+            if brand_meta and brand_meta.get("content"):
+                brand = brand_meta["content"]
 
-        # Try to find specific brand meta/tag if possible, else rely on H1
-        brand_meta = soup.find("meta", attrs={"itemprop": "brand"})
-        if brand_meta and brand_meta.get("content"):
-            brand = brand_meta["content"]
+        # 2. Extract Rating
+        ratings: float = 0.0
+        rating_link = soup.find("a", href="#pdReviewsScroll")
+        if rating_link and rating_link.get("title"):
+            try:
+                match = re.search(r"(\d+(?:[.,]\d+)?)", rating_link["title"])
+                if match:
+                    ratings = float(match.group(1).replace(",", "."))
+            except (ValueError, IndexError):
+                pass
+        else:
+            rating_meta = soup.find("meta", attrs={"itemprop": "ratingValue"})
+            if rating_meta and rating_meta.get("content"):
+                try:
+                    ratings = float(rating_meta["content"])
+                except ValueError:
+                    pass
 
-        # 2. Extract Omnibus Min Price (Common)
-        min_price = 0.0
+        # 3. Handle last_30d_price (Omnibus)
+        last_30d_price: float = 0.0
+        # Case A: "Cena minimalna" in specifications
         specs = soup.find("div", {"data-testid": "product-specifications"})
         if specs:
-            # Look for text "Cena minimalna"
-            # We assume the text node contains the price
-            omnibus_text = specs.find(string=re.compile("Cena minimalna"))
-            if omnibus_text:
-                min_price = self._clean_price(omnibus_text)
+            min_price_text = specs.find(string=re.compile("Cena minimalna", re.I))
+            if min_price_text:
+                match = re.search(r"Cena minimalna\s*(\d+(?:[.,]\d+)?)", min_price_text)
+                if match:
+                    last_30d_price = self._clean_price(match.group(1))
 
-        # 3. Detect Scenarios
+        # Case B: "Ostatnia najniższa cena" in discount/voucher block
+        lowest_msg = soup.find(string=re.compile("Ostatnia najniższa cena", re.I))
+        if lowest_msg:
+            # Usually followed by a span with class 'lwyce7r'
+            price_span = lowest_msg.parent.find("span", class_="lwyce7r")
+            if price_span:
+                last_30d_price = self._clean_price(price_span.get_text(strip=True))
+
+        # 4. Detect Scenarios
         variants_container = soup.find(id="pdVariantsTile")
 
         if variants_container:
-            self._handle_multi_variant(variants_container, brand, name, min_price)
+            self._handle_multi_variant(
+                variants_container, brand, name, last_30d_price, ratings
+            )
         else:
-            self._handle_single_variant(soup, brand, name, min_price, url)
+            self._handle_single_variant(
+                soup, brand, name, last_30d_price, url, ratings
+            )
 
-    def _handle_multi_variant(self, container, brand, name, min_price):
+    def _handle_multi_variant(self, container, brand, name, last_30d_price, ratings):
         """Scenario A: Parse multiple variants from the list."""
         try:
             items = container.find_all("li")
@@ -239,16 +274,16 @@ class NotinoScraper(BaseScraper):
                 price_span = item.find("span", {"data-testid": "price-variant"})
                 if not price_span:
                     continue
-                price = self._clean_price(price_span.get_text(strip=True))
+                price: float = self._clean_price(price_span.get_text(strip=True))
 
                 # Volume / Label
                 vol_div = item.find(class_="pd-variant-label")
-                vol_text = vol_div.get_text(strip=True) if vol_div else ""
+                vol_text: str = vol_div.get_text(strip=True) if vol_div else ""
                 volume, unit = self._parse_volume(vol_text)
 
                 # Unique ID (from anchor)
                 link = item.find("a")
-                variant_id = link.get("id") if link else "unknown_var"
+                variant_id: str = link.get("id") if link else "unknown_var"
                 # Fallback if ID is missing, use href hash
                 if not variant_id and link and "href" in link.attrs:
                     variant_id = link["href"].split("#")[-1]
@@ -261,44 +296,74 @@ class NotinoScraper(BaseScraper):
                     unit=unit,
                     volume=volume,
                     price=price,
-                    min_price=min_price,
+                    last_30d_price=last_30d_price,
+                    ratings=ratings,
+                    desc="Standard",
                 )
         except Exception as e:
             self.log.error(f"Error parsing multi-variants: {e}")
 
-    def _handle_single_variant(self, soup, brand, name, min_price, url):
+    def _handle_single_variant(self, soup, brand, name, last_30d_price, url, ratings):
         """Scenario B: Parse single selected variant."""
         try:
-            wrapper = soup.find(id="pdSelectedVariant")
-            if not wrapper:
-                self.log.warning("Could not find single variant wrapper.")
-                return
+            promo_desc: str = "Standard"
+            raw_price: float = 0.0
 
-            # Price
-            price_div = soup.find("div", {"data-testid": "pd-price-wrapper"})
-            price_span = (
-                price_div.find("span", attrs={"content": True}) if price_div else None
-            )
+            # 1. Volume extraction - Priority: aria-live block
+            volume: float = 0.0
+            unit: str = "N/A"
+            aria_live_div = soup.find("div", {"aria-live": "assertive"})
+            if aria_live_div:
+                # Based on example: first span inside nested div
+                vol_span = aria_live_div.find("span")
+                if vol_span:
+                    volume, unit = self._parse_volume(vol_span.get_text(strip=True))
 
-            raw_price_val = 0.0
-            if price_span:
-                # Usually 'content' attribute holds the clean number, or use text
-                raw_price_val = self._clean_price(price_span.get_text(strip=True))
+            # Fallback for volume
+            if volume == 0:
+                wrapper = soup.find(id="pdSelectedVariant")
+                if wrapper:
+                    target = wrapper.find(string=re.compile(r"\d+\s*[a-zA-Z]+"))
+                    if target:
+                        volume, unit = self._parse_volume(target.strip())
 
-            # Volume
-            # Dynamic class, so we search for text pattern inside the wrapper
-            # Look for any child div that matches volume regex
-            vol_text = ""
-            # Helper to find text matching volume pattern
-            target = wrapper.find(string=re.compile(r"\d+\s*[a-zA-Z]+"))
-            if target:
-                vol_text = target.strip()
+            # 2. Price extraction - Priority: Voucher block
+            # Logic: If 'z kodem' exists, that price is raw_price.
+            voucher_indicator = soup.find(string=re.compile("z kodem", re.I))
+            if voucher_indicator:
+                # Look for price in the voucher block (usually nearby span with content or pd-price-wrapper)
+                # Looking up the tree or in siblings for the price wrapper
+                parent_block = voucher_indicator.find_parent(class_="tc9g2yy") or voucher_indicator.find_parent("div")
+                if parent_block:
+                    price_wrapper = parent_block.find("span", {"data-testid": "pd-price-wrapper"})
+                    if price_wrapper:
+                        raw_price = self._clean_price(price_wrapper.get_text(strip=True))
+                        # Try to find the code itself
+                        code_span = parent_block.find("span", class_="c1tsg8xv")
+                        code_name = code_span.get_text(strip=True) if code_span else "voucher"
+                        promo_desc = f"z kodem {code_name}"
 
-            volume, unit = self._parse_volume(vol_text)
+            # Fallback to standard price wrapper
+            if raw_price == 0:
+                # Check for "aria-live" price block
+                if aria_live_div:
+                    price_span = aria_live_div.find("span", {"data-testid": "pd-price"})
+                    if price_span:
+                        raw_price = self._clean_price(price_span.get_text(strip=True))
 
-            # Generate a pseudo-ID from URL if no specific ID found
-            product_id_proxy = url.split("/")[-1]
+                # Fallback to standard pd-price-wrapper
+                if raw_price == 0:
+                    price_div = soup.find("div", {"data-testid": "pd-price-wrapper"})
+                    if price_div:
+                        raw_price = self._clean_price(price_div.get_text(strip=True))
 
+            # Check for "Promocja ograniczona czasowo" if no voucher
+            if promo_desc == "Standard":
+                if soup.find(string=re.compile("Promocja ograniczona czasowo", re.I)):
+                    promo_desc = "Promocja ograniczona czasowo"
+
+            # 3. Save
+            product_id_proxy: str = url.split("/")[-1]
             self._save_to_db(
                 ean=product_id_proxy,
                 brand=brand,
@@ -306,14 +371,28 @@ class NotinoScraper(BaseScraper):
                 category="Face",
                 unit=unit,
                 volume=volume,
-                price=raw_price_val,
-                min_price=min_price,
+                price=raw_price,
+                last_30d_price=last_30d_price,
+                ratings=ratings,
+                desc=promo_desc,
             )
 
         except Exception as e:
             self.log.error(f"Error parsing single variant: {e}")
 
-    def _save_to_db(self, ean, brand, name, category, unit, volume, price, min_price):
+    def _save_to_db(
+        self,
+        ean: str,
+        brand: str,
+        name: str,
+        category: str,
+        unit: str,
+        volume: float,
+        price: float,
+        last_30d_price: float,
+        ratings: float,
+        desc: str = "Standard",
+    ):
         """
         Helper to interface with PriceDatabase.
         """
@@ -329,17 +408,18 @@ class NotinoScraper(BaseScraper):
             )
 
             # 2. Log Price
-            # We map the scraped current price to effective_price
-            # We map the Omnibus/Min price to raw_price (or just use same if no diff)
+            # raw_price = current price on site (after voucher if applicable)
+            # last_30d_price = the Omnibus minimum price if found, else fallback to current
             self.db.log_price(
                 product_id=prod_db_id,
                 shop="Notino",
-                raw_price=min_price if min_price > 0 else price,
-                effective_price=price,
-                desc="Standard",
-                is_promo=False,  # Logic for promo detection can be added later
+                raw_price=price,
+                last_30d_price=last_30d_price if last_30d_price > 0 else price,
+                ratings=ratings,
+                desc=desc,
+                is_promo=desc != "Standard",
             )
-            self.log.info(f"Saved: {name} | {price} PLN")
+            self.log.info(f"Saved: {name} | {price} PLN (Min: {last_30d_price})")
 
         except Exception as e:
             self.log.error(f"Database error for {name}: {e}")
