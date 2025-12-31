@@ -1,0 +1,13 @@
+{
+    "exe_path": "C:\\Program Files\\NordVPN\\NordVPN.exe",
+    "connection_criteria": {
+        "main_choice": "region",
+        "group_id": 19,
+        "strategy": "recommended"
+    },
+    "cache_expiry_seconds": 600,
+    "used_servers_cache": {
+        "1005697": 1767211165.1114779,
+        "984522": 1767211280.3095827
+    }
+}

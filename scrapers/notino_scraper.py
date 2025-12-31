@@ -1,14 +1,14 @@
 import os
 import time
 import re
-from typing import Set, Optional, Tuple, List
+import curl_cffi.requests as requests
+from typing import Set, Tuple
 from bs4 import BeautifulSoup
 from utils.base_scraper import BaseScraper
 from config import NOTINO_URL, MAX_PRODUCTS
 from database.database import (
     PriceDatabase,
 )  # Assuming database.py is in the python path
-import curl_cffi.requests as requests
 
 
 class NotinoScraper(BaseScraper):
@@ -33,11 +33,13 @@ class NotinoScraper(BaseScraper):
         """
         if not price_str:
             return 0.0
+        self.log.debug("Cena minimalna before cleaning: " + price_str)
         # Remove anything that isn't a digit or a comma
         clean = re.sub(r"[^\d,]", "", price_str)
         # Replace decimal comma with dot
         clean = clean.replace(",", ".")
         try:
+            self.log.debug(f"Clean cena minimalna: {clean}")
             return float(clean)
         except ValueError:
             self.log.error(f"Failed to convert price: {price_str}")
@@ -199,7 +201,7 @@ class NotinoScraper(BaseScraper):
         # 1. Extract Common Data (Brand/Name)
         h1 = soup.find("h1")
         full_name = h1.get_text(strip=False) if h1 else "Unknown Product"
-        print(full_name)
+        self.log.debug("Full product name: " + full_name)
         # Simple heuristic: Split H1 for Brand, or use meta tags if available
         # Requirement says "Extract Brand/Name from <h1>"
         brand = "Notino Selection"  # Default
