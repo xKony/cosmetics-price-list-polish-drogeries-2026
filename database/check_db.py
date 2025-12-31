@@ -25,6 +25,7 @@ def check_database():
     print("\n=== Latest 15 Price Logs ===")
     query = """
         SELECT 
+            p.ean,
             p.brand, 
             p.name, 
             pl.raw_price, 
@@ -35,21 +36,19 @@ def check_database():
         FROM price_log pl
         JOIN products p ON pl.product_id = p.product_id
         ORDER BY pl.scraped_at DESC
-        LIMIT 150
+        LIMIT 15
     """
     cursor.execute(query)
     rows = cursor.fetchall()
     
     # Simple formatting
-    header = f"{'Brand':<15} | {'Name':<35} | {'Price':<8} | {'Min30d':<8} | {'Stars':<5} | {'Promo':<25}"
-    print("-" * len(header))
-    print(header)
-    print("-" * len(header))
+    print(f"{'EAN/Kod':<12} | {'Brand':<10} | {'Name':<35} | {'Price':<7} | {'Min30d':<7} | {'Stars':<5} | {'Promo'}")
+    print("-" * 110)
     for row in rows:
-        brand, name, price, min30, stars, promo, _ = row
+        ean, brand, name, price, min30, stars, promo, _ = row
         # Sanitize name for display
-        display_name = (name[:32] + '...') if len(name) > 35 else name
-        print(f"{str(brand):<15} | {str(display_name):<35} | {str(price):<8} | {str(min30):<8} | {str(stars):<5} | {str(promo):<25}")
+        dn = (name[:32] + '...') if len(str(name)) > 35 else name
+        print(f"{str(ean):<12} | {str(brand):<10} | {str(dn):<35} | {str(price):<7} | {str(min30):<7} | {str(stars):<5} | {str(promo)}")
 
     conn.close()
 
