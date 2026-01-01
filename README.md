@@ -2,7 +2,7 @@
 
 > **A high-performance, stealth-optimized scraping pipeline for tracking cosmetic product prices, variants, and historical trends across major Polish e-commerce platforms.**
 
-![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.12%2B-blue?style=for-the-badge&logo=python&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white)
 ![NordVPN](https://img.shields.io/badge/NordVPN-4687FF?style=for-the-badge&logo=nordvpn&logoColor=white)
 
@@ -86,7 +86,7 @@ graph TD
 
 ### Prerequisites
 
-- Python 3.10+
+- Python 3.12+
 - NordVPN Account (and CLI installed)
 
 ### Installation
@@ -111,6 +111,7 @@ graph TD
    USE_NORDVPN = True        # Enable/Disable VPN
    VPN_ROTATE_MIN = 15       # Min requests before rotation
    NOTINO_URL = "..."        # Target Category URL
+   # and more...
    ```
 
 4. **Run the Scraper**
