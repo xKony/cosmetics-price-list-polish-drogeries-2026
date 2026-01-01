@@ -10,7 +10,7 @@
 
 ## 📸 Demo
 
-![Project Dashboard Placeholder](https://i.imgur.com/WilT2Bf.gif)
+![Project Dashboard Placeholder](demo.gif)
 
 ---
 
