@@ -7,14 +7,15 @@ import random
 from typing import Set, Tuple, Optional, Match
 from bs4 import BeautifulSoup
 from utils.base_scraper import BaseScraper
-from config import NOTINO_URL, MAX_PRODUCTS
+from config import NOTINO_URL, MAX_PRODUCTS, VPN_ROTATE_MIN, VPN_ROTATE_MAX
 from database.price_database import PriceDatabase
 
 
 class NotinoScraper(BaseScraper):
-    def __init__(self):
+    def __init__(self, vpn_manager=None):
         # Initialize parent class
         super().__init__()
+        self.vpn_manager = vpn_manager
         # Configuration specific to Notino
         self.base_url: str = NOTINO_URL
         self.output_dir: str = "scrapers/urls/"
@@ -178,14 +179,23 @@ class NotinoScraper(BaseScraper):
         queue = list(initial_urls)
         # Track visited URLs to avoid duplicates and loops
         visited = set(initial_urls)
-        
-        # Track failures and attempts
         failed_urls = []
         attempts = {url: 0 for url in initial_urls}
+
+        # VPN Rotation Tracking
+        products_since_rotate = 0
+        rotate_threshold = random.randint(VPN_ROTATE_MIN, VPN_ROTATE_MAX)
 
         self.log.info(f"Loaded {len(initial_urls)} URLs. Starting processing with variant discovery.")
 
         while queue or failed_urls:
+            # Check for VPN rotation
+            if self.vpn_manager and products_since_rotate >= rotate_threshold:
+                self.log.info(f"Processed {products_since_rotate} products. Rotating VPN (Threshold: {rotate_threshold})...")
+                self.vpn_manager.rotate_ip()
+                products_since_rotate = 0
+                rotate_threshold = random.randint(VPN_ROTATE_MIN, VPN_ROTATE_MAX)
+
             # If queue is empty but we have failures, try to requeue valid retries
             if not queue and failed_urls:
                 self.log.info(f"Main queue empty. Retrying {len(failed_urls)} failed URLs...")
@@ -214,6 +224,7 @@ class NotinoScraper(BaseScraper):
             # Or only on failure?
             # Let's count *attempts made*.
             attempts[url] = attempts.get(url, 0) + 1
+            products_since_rotate += 1
             
             try:
                 self.log.info(f"Processing product: {url} (Attempt {attempts[url]})")

@@ -1,7 +1,11 @@
 SAVE_LOGS = True
 LOG_LEVEL = "DEBUG"
 HEADLESS_BROWSER = False
+USE_NORDVPN = True
 SCRAPE_INTERVAL_MIN = 1.0
 SCRAPE_INTERVAL_MAX = 1.5
 MAX_PRODUCTS = 2000
 NOTINO_URL = "https://www.notino.pl/kosmetyka/kosmetyki-do-twarzy/"
+
+VPN_ROTATE_MIN = 15
+VPN_ROTATE_MAX = 35
