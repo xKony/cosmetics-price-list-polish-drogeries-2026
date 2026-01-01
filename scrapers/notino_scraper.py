@@ -2,6 +2,8 @@ import os
 import time
 import re
 import curl_cffi.requests as requests
+import itertools
+import random
 from typing import Set, Tuple, Optional, Match
 from bs4 import BeautifulSoup
 from utils.base_scraper import BaseScraper
@@ -160,6 +162,7 @@ class NotinoScraper(BaseScraper):
         """
         Reads URLs from file and extracts detailed product data.
         Uses a queue to handle variants dynamically.
+        Randomizes order and retries failed URLs up to 3 times.
         """
         input_path = os.path.join(self.output_dir, self.output_file)
 
@@ -170,24 +173,61 @@ class NotinoScraper(BaseScraper):
         with open(input_path, "r", encoding="utf-8") as f:
             initial_urls = f.read().splitlines()
 
+        # Randomize initial order
+        random.shuffle(initial_urls)
+
         # Queue for processing (BFS)
         queue = list(initial_urls)
         # Track visited URLs to avoid duplicates and loops
         visited = set(initial_urls)
+        
+        # Track failures and attempts
+        failed_urls = []
+        attempts = {url: 0 for url in initial_urls}
 
         self.log.info(f"Loaded {len(initial_urls)} URLs. Starting processing with variant discovery.")
 
-        while queue:
+        while queue or failed_urls:
+            # If queue is empty but we have failures, try to requeue valid retries
+            if not queue and failed_urls:
+                self.log.info(f"Main queue empty. Retrying {len(failed_urls)} failed URLs...")
+                requeue_list = []
+                for f_url in failed_urls:
+                    # We only requeue if we haven't hit the limit yet
+                    # Note: attempts are incremented on failure
+                    curr_attempts = attempts.get(f_url, 0)
+                    if curr_attempts < 3:
+                        requeue_list.append(f_url)
+                
+                failed_urls = []
+                if not requeue_list:
+                    self.log.info("No more URLs to retry (max attempts reached for all failures).")
+                    break
+                
+                queue = requeue_list
+                self.log.info(f"Requeued {len(queue)} URLs for retry.")
+
+            if not queue:
+                break
+
             url = queue.pop(0)
             
+            # Increment attempt counter for this processing start? 
+            # Or only on failure?
+            # Let's count *attempts made*.
+            attempts[url] = attempts.get(url, 0) + 1
+            
             try:
-                self.log.info(f"Processing product: {url}")
+                self.log.info(f"Processing product: {url} (Attempt {attempts[url]})")
                 response = requests.get(url, impersonate=self.impersonate, timeout=30)
 
                 if response.status_code != 200:
                     self.log.error(
                         f"Failed to fetch {url} (Status: {response.status_code})"
                     )
+                    # Treat non-200 as failure
+                    if attempts[url] < 3:
+                        failed_urls.append(url)
                     continue
 
                 soup = BeautifulSoup(response.content, "html.parser")
@@ -200,10 +240,14 @@ class NotinoScraper(BaseScraper):
                     if variant_url not in visited:
                         visited.add(variant_url)
                         queue.append(variant_url)
+                        # Initialize attempt count for new variant
+                        attempts[variant_url] = 0
                         self.log.info(f"Added variant to queue: {variant_url}")
 
             except Exception as e:
                 self.log.error(f"Critical error processing {url}: {e}")
+                if attempts[url] < 3:
+                    failed_urls.append(url)
 
             # Politeness
             time.sleep(self.interval)
@@ -410,7 +454,7 @@ class NotinoScraper(BaseScraper):
                     # (wrapper -> aria-live -> container -> main variant block)
                     parts = pd_price_wrapper.parents
                     # Take the first ~3 parents as scope
-                    import itertools
+                    
                     promo_scope = next(itertools.islice(parts, 2, 3), None)
 
                 if promo_scope:
