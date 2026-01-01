@@ -159,6 +159,7 @@ class NotinoScraper(BaseScraper):
     def scrape_products(self):
         """
         Reads URLs from file and extracts detailed product data.
+        Uses a queue to handle variants dynamically.
         """
         input_path = os.path.join(self.output_dir, self.output_file)
 
@@ -167,11 +168,18 @@ class NotinoScraper(BaseScraper):
             return
 
         with open(input_path, "r", encoding="utf-8") as f:
-            urls = f.read().splitlines()
+            initial_urls = f.read().splitlines()
 
-        self.log.info(f"Loaded {len(urls)} URLs for detailed scraping.")
+        # Queue for processing (BFS)
+        queue = list(initial_urls)
+        # Track visited URLs to avoid duplicates and loops
+        visited = set(initial_urls)
 
-        for url in urls:
+        self.log.info(f"Loaded {len(initial_urls)} URLs. Starting processing with variant discovery.")
+
+        while queue:
+            url = queue.pop(0)
+            
             try:
                 self.log.info(f"Processing product: {url}")
                 response = requests.get(url, impersonate=self.impersonate, timeout=30)
@@ -183,7 +191,16 @@ class NotinoScraper(BaseScraper):
                     continue
 
                 soup = BeautifulSoup(response.content, "html.parser")
-                self._parse_and_save_product(soup, url)
+                
+                # Parse product and get potential variant links
+                new_variants = self._parse_and_save_product(soup, url)
+                
+                # Add new variants to queue
+                for variant_url in new_variants:
+                    if variant_url not in visited:
+                        visited.add(variant_url)
+                        queue.append(variant_url)
+                        self.log.info(f"Added variant to queue: {variant_url}")
 
             except Exception as e:
                 self.log.error(f"Critical error processing {url}: {e}")
@@ -265,58 +282,30 @@ class NotinoScraper(BaseScraper):
                 if price_span:
                     last_30d_price = self._clean_price(price_span.get_text(strip=True))
 
-        # 4. Detect Scenarios
-        variants_container = soup.find(id="pdVariantsTile")
+        # 4. Save Current Product Data
+        # Always treat the current page as a single variant record
+        self._handle_single_variant(
+            soup, brand, name, last_30d_price, url, ratings, product_code
+        )
 
-        if variants_container:
-            self._handle_multi_variant(
-                variants_container, brand, name, last_30d_price, ratings, product_code
-            )
-        else:
-            self._handle_single_variant(
-                soup, brand, name, last_30d_price, url, ratings, product_code
-            )
-
-    def _handle_multi_variant(self, container, brand, name, last_30d_price, ratings, product_code=None):
-        """Scenario A: Parse multiple variants from the list."""
+        # 5. Discover Variants
+        # Extract links for other variants to visit
+        variant_links = []
         try:
-            items = container.find_all("li")
-            for item in items:
-                # Price
-                price_span = item.find("span", {"data-testid": "price-variant"})
-                if not price_span:
-                    continue
-                price: float = self._clean_price(price_span.get_text(strip=True))
-
-                # Volume / Label
-                vol_div = item.find(class_="pd-variant-label")
-                vol_text: str = vol_div.get_text(strip=True) if vol_div else ""
-                volume, unit = self._parse_volume(vol_text)
-
-                # Unique ID (from anchor)
-                link = item.find("a")
-                variant_id: str = link.get("id") if link else "unknown_var"
-                # Fallback if ID is missing, use product_code suffix if available, else href hash
-                if not variant_id or variant_id == "unknown_var":
-                    if product_code:
-                        variant_id = f"{product_code}_{vol_text.replace(' ', '')}"
-                    elif link and "href" in link.attrs:
-                        variant_id = link["href"].split("#")[-1]
-
-                self._save_to_db(
-                    ean=variant_id,
-                    brand=brand,
-                    name=f"{name} ({vol_text})",
-                    category="Face",
-                    unit=unit,
-                    volume=volume,
-                    price=price,
-                    last_30d_price=last_30d_price,
-                    ratings=ratings,
-                    desc="Standard",
-                )
+            # Selector: a[data-testid^="pd-variant-"]
+            variant_elements = soup.find_all("a", attrs={"data-testid": re.compile(r"^pd-variant-")})
+            for el in variant_elements:
+                href = el.get("href")
+                if href:
+                    if href.startswith("/"):
+                        href = f"https://www.notino.pl{href}"
+                    variant_links.append(href)
         except Exception as e:
-            self.log.error(f"Error parsing multi-variants: {e}")
+            self.log.error(f"Error extracting variants: {e}")
+
+        return variant_links
+
+
 
     def _handle_single_variant(self, soup, brand, name, last_30d_price, url, ratings, product_code=None):
         """Scenario B: Parse single selected variant."""
