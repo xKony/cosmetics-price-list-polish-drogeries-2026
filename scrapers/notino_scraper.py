@@ -6,7 +6,7 @@ from typing import Set, Tuple, Optional, Match
 from bs4 import BeautifulSoup
 from utils.base_scraper import BaseScraper
 from config import NOTINO_URL, MAX_PRODUCTS
-from database.database import PriceDatabase
+from database.price_database import PriceDatabase
 
 
 class NotinoScraper(BaseScraper):
@@ -321,55 +321,120 @@ class NotinoScraper(BaseScraper):
     def _handle_single_variant(self, soup, brand, name, last_30d_price, url, ratings, product_code=None):
         """Scenario B: Parse single selected variant."""
         try:
-            promo_desc: str = "Standard"
+            promo_desc: Optional[str] = None
             raw_price: float = 0.0
 
-            # 1. Volume extraction - Priority: aria-live block
+            # 1. Volume extraction
             volume: float = 0.0
             unit: str = "N/A"
             aria_live_div = soup.find("div", {"aria-live": "assertive"})
             if aria_live_div:
-                vol_span = aria_live_div.find("span")
-                if vol_span:
-                    volume, unit = self._parse_volume(vol_span.get_text(strip=True))
+                # Iterate through all spans to find one that matches volume pattern
+                for span in aria_live_div.find_all("span"):
+                    v, u = self._parse_volume(span.get_text(strip=True))
+                    if v > 0:
+                        volume, unit = v, u
+                        break
 
             if volume == 0:
                 wrapper = soup.find(id="pdSelectedVariant")
                 if wrapper:
+                    # Look for string with a volume-like pattern (number followed by unit)
                     target = wrapper.find(string=re.compile(r"\d+\s*[a-zA-Z]+"))
                     if target:
                         volume, unit = self._parse_volume(target.strip())
 
             # 2. Price extraction
-            voucher_indicator = soup.find(string=re.compile("z kodem", re.I))
+            pd_price_wrapper = soup.find("div", {"data-testid": "pd-price-wrapper"})
+            # Try to find specific voucher/promo price block
+            # Look for 'z kodem' only within relevant price containers to avoid footer false positives
+            voucher_indicator = None
+            if pd_price_wrapper:
+                # Check siblings or parents of price wrapper for voucher info
+                # Usually the price wrapper is inside a block that contains the 'z kodem' text
+                container = pd_price_wrapper.find_parent("div")
+                if container:
+                    voucher_indicator = container.find(string=re.compile("z kodem", re.I))
+            
+            if not voucher_indicator:
+                # Fallback: check global soup but verify context (must accept a code or be near price)
+                # We limit strictness to avoid "Zapisz się newsletter z kodem" in footers
+                candidates = soup.find_all(string=re.compile("z kodem", re.I))
+                for cand in candidates:
+                    # Check if this candidate is near a price wrapper
+                    parent = cand.find_parent("div")
+                    if parent and parent.find("span", {"data-testid": "pd-price-wrapper"}):
+                        voucher_indicator = cand
+                        break
+
             if voucher_indicator:
                 parent_block = voucher_indicator.find_parent(class_="tc9g2yy") or voucher_indicator.find_parent("div")
                 if parent_block:
                     price_wrapper = parent_block.find("span", {"data-testid": "pd-price-wrapper"})
                     if price_wrapper:
-                        raw_price = self._clean_price(price_wrapper.get_text(strip=True))
+                        # Prefer 'content' attribute if available for clean numeric value
+                        price_val_el = price_wrapper.find("span", {"content": True})
+                        if price_val_el:
+                            raw_price = self._clean_price(price_val_el["content"])
+                        else:
+                            raw_price = self._clean_price(price_wrapper.get_text(strip=True))
+                        
                         code_span = parent_block.find("span", class_="c1tsg8xv")
-                        code_name = code_span.get_text(strip=True) if code_span else "voucher"
-                        promo_desc = f"z kodem {code_name}"
+                        code_name = code_span.get_text(strip=True) if code_span else None
+                        if code_name:
+                            promo_desc = f"z kodem {code_name}"
 
+            # Priority 2: Use id="pd-price"
+            if raw_price == 0:
+                pd_price_el = soup.find(id="pd-price")
+                if pd_price_el:
+                    price_span = pd_price_el.find("span", {"data-testid": "pd-price"})
+                    if price_span:
+                        raw_price = self._clean_price(price_span.get("content") or price_span.get_text(strip=True))
+                    else:
+                        raw_price = self._clean_price(pd_price_el.get_text(strip=True))
+
+            # Priority 3: data-testid="pd-price" anywhere
+            if raw_price == 0:
+                price_el = soup.find(attrs={"data-testid": "pd-price"})
+                if price_el:
+                    raw_price = self._clean_price(price_el.get("content") or price_el.get_text(strip=True))
+
+             # Priority 4: Fallback checks
             if raw_price == 0:
                 if aria_live_div:
                     price_span = aria_live_div.find("span", {"data-testid": "pd-price"})
                     if price_span:
                         raw_price = self._clean_price(price_span.get_text(strip=True))
 
-                if raw_price == 0:
-                    price_div = soup.find("div", {"data-testid": "pd-price-wrapper"})
-                    if price_div:
-                        raw_price = self._clean_price(price_div.get_text(strip=True))
+                if raw_price == 0 and pd_price_wrapper:
+                     raw_price = self._clean_price(pd_price_wrapper.get_text(strip=True))
 
-            if promo_desc == "Standard":
-                if soup.find(string=re.compile("Promocja ograniczona czasowo", re.I)):
-                    promo_desc = "Promocja ograniczona czasowo"
+            # Promo Description Logic
+            if not promo_desc:
+                # Scope the search to avoid false positives from page footer/header
+                # We look in the product variant container or near the price.
+                promo_scope = soup.find(id="pdSelectedVariant")
+                
+                if not promo_scope and pd_price_wrapper:
+                    # Fallback: Go up 3 levels from price wrapper to capture the product block
+                    # (wrapper -> aria-live -> container -> main variant block)
+                    parts = pd_price_wrapper.parents
+                    # Take the first ~3 parents as scope
+                    import itertools
+                    promo_scope = next(itertools.islice(parts, 2, 3), None)
+
+                if promo_scope:
+                    if promo_scope.find(string=re.compile("Promocja ograniczona czasowo", re.I)):
+                         promo_desc = "Promocja ograniczona czasowo"
 
             # 3. Save - Use Product Code as EAN if found, else fallback to URL proxy
             final_ean: str = product_code if product_code else url.split("/")[-1]
             
+            # Ensure last_30d_price defaults to raw_price if 0
+            if last_30d_price <= 0:
+                last_30d_price = raw_price
+
             self._save_to_db(
                 ean=final_ean,
                 brand=brand,
@@ -380,7 +445,7 @@ class NotinoScraper(BaseScraper):
                 price=raw_price,
                 last_30d_price=last_30d_price,
                 ratings=ratings,
-                desc=promo_desc,
+                desc=promo_desc if promo_desc else "",
             )
 
         except Exception as e:
@@ -397,7 +462,7 @@ class NotinoScraper(BaseScraper):
         price: float,
         last_30d_price: float,
         ratings: float,
-        desc: str = "Standard",
+        desc: Optional[str] = None,
     ):
         """
         Helper to interface with PriceDatabase.
@@ -423,7 +488,7 @@ class NotinoScraper(BaseScraper):
                 last_30d_price=last_30d_price if last_30d_price > 0 else price,
                 ratings=ratings,
                 desc=desc,
-                is_promo=desc != "Standard",
+                is_promo=bool(desc) and desc != "Standard",
             )
             self.log.info(f"Saved: {name} | {price} PLN (Min: {last_30d_price})")
 
