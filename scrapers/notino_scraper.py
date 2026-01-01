@@ -33,13 +33,11 @@ class NotinoScraper(BaseScraper):
         """
         if not price_str:
             return 0.0
-        self.log.debug("Cena minimalna before cleaning: " + price_str)
         # Remove anything that isn't a digit or a comma
         clean: str = re.sub(r"[^\d,]", "", price_str)
         # Replace decimal comma with dot
         clean: str = clean.replace(",", ".")
         try:
-            self.log.debug(f"Clean cena minimalna: {clean}")
             return float(clean)
         except ValueError:
             self.log.error(f"Failed to convert price: {price_str}")
@@ -303,11 +301,11 @@ class NotinoScraper(BaseScraper):
         specs = soup.find("div", {"data-testid": "product-specifications"})
         if specs:
             # Omnibus
-            min_price_text = specs.find(string=re.compile("Cena minimalna", re.I))
-            if min_price_text:
-                match = re.search(r"Cena minimalna\s*(\d+(?:[.,]\d+)?)", min_price_text)
-                if match:
-                    last_30d_price = self._clean_price(match.group(1))
+            # Search in the full text of specs to handle split elements
+            specs_text = specs.get_text(" ", strip=True) 
+            match = re.search(r"Cena minimalna\s*(\d+(?:[.,]\d+)?)", specs_text, re.I)
+            if match:
+                last_30d_price = self._clean_price(match.group(1))
             
             # Product Code (Kod)
             kod_text = specs.find(string=re.compile("Kod:", re.I))
@@ -378,7 +376,7 @@ class NotinoScraper(BaseScraper):
                         volume, unit = self._parse_volume(target.strip())
 
             # 2. Price extraction
-            pd_price_wrapper = soup.find("div", {"data-testid": "pd-price-wrapper"})
+            pd_price_wrapper = soup.find(attrs={"data-testid": "pd-price-wrapper"})
             # Try to find specific voucher/promo price block
             # Look for 'z kodem' only within relevant price containers to avoid footer false positives
             voucher_indicator = None
@@ -445,22 +443,25 @@ class NotinoScraper(BaseScraper):
 
             # Promo Description Logic
             if not promo_desc:
-                # Scope the search to avoid false positives from page footer/header
-                # We look in the product variant container or near the price.
-                promo_scope = soup.find(id="pdSelectedVariant")
+                # 1. Check strict scoped elements first (like pdSelectedVariant) - implemented above?
+                # Actually, let's rely on the strategy of checking relatives of the price wrapper.
                 
-                if not promo_scope and pd_price_wrapper:
-                    # Fallback: Go up 3 levels from price wrapper to capture the product block
-                    # (wrapper -> aria-live -> container -> main variant block)
-                    parts = pd_price_wrapper.parents
-                    # Take the first ~3 parents as scope
-                    
-                    promo_scope = next(itertools.islice(parts, 2, 3), None)
-
-                if promo_scope:
-                    if promo_scope.find(string=re.compile("Promocja ograniczona czasowo", re.I)):
-                         promo_desc = "Promocja ograniczona czasowo"
-
+                # Strategy: Go up from price_wrapper to find the container that holds both price and promo text.
+                # The user provided example shows they are close siblings/cousins.
+                if pd_price_wrapper:
+                    curr = pd_price_wrapper
+                    # Traverse up to 4 levels to find a common parent container
+                    for _ in range(4):
+                        curr = curr.find_parent("div")
+                        if not curr:
+                            break
+                        
+                        # Check strictly in this container's text 
+                        # We use a regex search on the clean text of this container
+                        if curr.find(string=re.compile("Promocja ograniczona czasowo", re.I)):
+                            promo_desc = "promocja"
+                            break
+                            
             # 3. Save - Use Product Code as EAN if found, else fallback to URL proxy
             final_ean: str = product_code if product_code else url.split("/")[-1]
             

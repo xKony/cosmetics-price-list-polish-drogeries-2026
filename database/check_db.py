@@ -21,34 +21,54 @@ def check_database():
     print(f"Total Products: {product_count}")
     print(f"Total Price Logs: {log_count}")
 
-    # 2. Latest 15 logs with product details
-    print("\n=== Latest 15 Price Logs ===")
+    # 2. Latest 100 logs with ALL details
+    print("\n=== Latest 100 Price Logs (All Columns) ===")
     query = """
         SELECT 
+            p.product_id,
             p.ean,
             p.brand, 
             p.name, 
+            p.category,
+            p.base_unit,
+            p.base_volume,
+            pl.shop_name,
             pl.raw_price, 
             pl.last_30d_price, 
             pl.review_ratings,
             pl.promo_desc,
+            pl.is_promo,
             pl.scraped_at
         FROM price_log pl
         JOIN products p ON pl.product_id = p.product_id
         ORDER BY pl.scraped_at DESC
-        LIMIT 15
+        LIMIT 100
     """
     cursor.execute(query)
     rows = cursor.fetchall()
     
-    # Simple formatting
-    print(f"{'EAN/Kod':<12} | {'Brand':<10} | {'Name':<35} | {'Price':<7} | {'Min30d':<7} | {'Stars':<5} | {'Promo'}")
-    print("-" * 110)
+    # Header
+    header = (
+        f"{'ID':<4} | {'EAN':<15} | {'Brand':<15} | {'Name':<30} | {'Cat':<8} | "
+        f"{'Unit':<5} | {'Vol':<6} | {'Shop':<8} | {'Price':<7} | {'Min30d':<7} | "
+        f"{'Stars':<5} | {'PromoDesc':<25} | {'IsPro':<5} | {'Time'}"
+    )
+    print(header)
+    print("-" * len(header))
+
     for row in rows:
-        ean, brand, name, price, min30, stars, promo, _ = row
-        # Sanitize name for display
-        dn = (name[:32] + '...') if len(str(name)) > 35 else name
-        print(f"{str(ean):<12} | {str(brand):<10} | {str(dn):<35} | {str(price):<7} | {str(min30):<7} | {str(stars):<5} | {str(promo)}")
+        pid, ean, brand, name, cat, unit, vol, shop, price, min30, stars, promo, is_promo, time = row
+        
+        # Sanitize name
+        dn = (str(name)[:27] + '...') if len(str(name)) > 30 else str(name)
+        # Sanitize promo
+        dp = (str(promo)[:22] + '...') if promo and len(str(promo)) > 25 else str(promo)
+        
+        print(
+            f"{str(pid):<4} | {str(ean):<15} | {str(brand):<15} | {dn:<30} | {str(cat):<8} | "
+            f"{str(unit):<5} | {str(vol):<6} | {str(shop):<8} | {str(price):<7} | {str(min30):<7} | "
+            f"{str(stars):<5} | {dp:<25} | {str(is_promo):<5} | {str(time)}"
+        )
 
     conn.close()
 
