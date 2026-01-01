@@ -1,5 +1,10 @@
 import sqlite3
 import os
+import sys
+
+# Force UTF-8 encoding for stdout (prevents char corruption in piped output)
+if sys.stdout.encoding != 'utf-8':
+    sys.stdout.reconfigure(encoding='utf-8')
 
 def check_database():
     db_path = os.path.join(os.path.dirname(__file__), "prices.db")
@@ -9,6 +14,8 @@ def check_database():
         return
 
     conn = sqlite3.connect(db_path)
+    # Ensure correct unicode handling
+    conn.text_factory = str 
     cursor = conn.cursor()
 
     print("\n=== Database Summary ===")

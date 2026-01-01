@@ -62,7 +62,7 @@ def get_logger(module_name):
 
         log_file = datetime.now().strftime("logs/%Y-%m-%d.log")
 
-        file_handler = logging.FileHandler(log_file)
+        file_handler = logging.FileHandler(log_file, encoding='utf-8')
         file_handler.setLevel(current_level)
 
         file_formatter = logging.Formatter(

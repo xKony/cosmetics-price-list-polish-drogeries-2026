@@ -1,76 +1,42 @@
 
 === Database Summary ===
 Total Products: 29
-Total Price Logs: 68
+Total Price Logs: 34
 
 === Latest 100 Price Logs (All Columns) ===
 ID   | EAN             | Brand           | Name                           | Cat      | Unit  | Vol    | Shop     | Price   | Min30d  | Stars | PromoDesc                 | IsPro | Time
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-24   | ADE02072        | A-Derma         | Dermalibour+ Barrier           | Face     | ml    | 50.0   | Notino   | 107.2   | 107.2   | 0.0   |                           | 0     | 2026-01-01 14:47:47
-3    | ADE02073        | A-Derma         | Dermalibour+ Barrier           | Face     | ml    | 100.0  | Notino   | 80.8    | 80.8    | 0.0   |                           | 0     | 2026-01-01 14:47:45
-28   | ADE02086        | A-Derma         | Biology AC                     | Face     | ml    | 100.0  | Notino   | 33.2    | 33.2    | 5.0   |                           | 0     | 2026-01-01 14:47:44
-27   | ADE02061        | A-Derma         | Biology AC                     | Face     | ml    | 200.0  | Notino   | 85.0    | 85.0    | 5.0   |                           | 0     | 2026-01-01 14:47:43
-21   | ADE02062        | A-Derma         | Biology AC                     | Face     | ml    | 400.0  | Notino   | 100.0   | 100.0   | 5.0   |                           | 0     | 2026-01-01 14:47:39
-29   | BEJ00630        | Anua            | Heartleaf 77% Soothing Toner   | Face     | ml    | 250.0  | Notino   | 90.18   | 106.1   | 5.0   | z kodem winter            | 1     | 2026-01-01 14:47:38
-22   | AUA00631        | Anua            | Heartleaf 77% Soothing Toner   | Face     | ml    | 500.0  | Notino   | 178.0   | 189.0   | 5.0   | promocja                  | 1     | 2026-01-01 14:47:36
-4    | ADE02063        | A-Derma         | Biology AC                     | Face     | ml    | 200.0  | Notino   | 85.0    | 85.0    | 0.0   |                           | 0     | 2026-01-01 14:47:33
-25   | ADE02064        | A-Derma         | Biology AC                     | Face     | ml    | 400.0  | Notino   | 100.0   | 100.0   | 0.0   |                           | 0     | 2026-01-01 14:47:31
-17   | ADE02092        | A-Derma         | Exomega Control Repairing E... | Face     | ml    | 200.0  | Notino   | 39.1    | 41.2    | 0.0   | promocja                  | 1     | 2026-01-01 14:47:24
-26   | ADE02093        | A-Derma         | Exomega Control Repairing E... | Face     | ml    | 400.0  | Notino   | 93.6    | 93.6    | 0.0   |                           | 0     | 2026-01-01 14:47:22
-23   | AUA00641        | Anua            | Peach 70% Niacin Serum         | Face     | ml    | 30.0   | Notino   | 97.75   | 108.0   | 5.0   | z kodem winter            | 1     | 2026-01-01 14:47:20
-18   | AAC04355        | AA Cosmetics    | AA Cosmetics                   | Face     | ml    | 200.0  | Notino   | 28.3    | 30.0    | 0.0   | promocja                  | 1     | 2026-01-01 14:47:19
-3    | ADE02073        | A-Derma         | Dermalibour+ Barrier           | Face     | ml    | 100.0  | Notino   | 80.8    | 80.8    | 0.0   |                           | 0     | 2026-01-01 14:47:17
-21   | ADE02062        | A-Derma         | Biology AC                     | Face     | ml    | 400.0  | Notino   | 100.0   | 100.0   | 5.0   |                           | 0     | 2026-01-01 14:47:16
-11   | AUA00689        | Anua            | Peach 70% Niacin Brightenin... | Face     | szt   | 1.0    | Notino   | 18.1    | 19.0    | 0.0   | z kodem winter            | 1     | 2026-01-01 14:47:14
-8    | AAC04360        | AA Cosmetics    | LAAB 100% Centella B12         | Face     | g     | 15.0   | Notino   | 30.0    | 30.0    | 0.0   |                           | 0     | 2026-01-01 14:47:12
-5    | AAC04348        | AA Cosmetics    | LAAB 100% Centella B12         | Face     | ml    | 200.0  | Notino   | 27.0    | 27.0    | 0.0   |                           | 0     | 2026-01-01 14:47:11
-20   | ADI05828        | Adidas          | UEFA Champions League Pro P... | Face     | ml    | 100.0  | Notino   | 54.0    | 54.0    | 0.0   |                           | 0     | 2026-01-01 14:47:09
-22   | AUA00631        | Anua            | Heartleaf 77% Soothing Toner   | Face     | ml    | 500.0  | Notino   | 178.0   | 189.0   | 5.0   | promocja                  | 1     | 2026-01-01 14:47:08
-16   | AUA00677        | Anua            | Rice Enzyme Brightening Cle... | Face     | g     | 40.0   | Notino   | 86.27   | 96.0    | 0.0   | z kodem winter            | 1     | 2026-01-01 14:47:06
-1    | AUA00647        | Anua            | Niacinamide 10% + TXA 4% Da... | Face     | ml    | 30.0   | Notino   | 95.2    | 111.9   | 5.0   | z kodem winter            | 1     | 2026-01-01 14:46:58
-4    | ADE02063        | A-Derma         | Biology AC                     | Face     | ml    | 200.0  | Notino   | 85.0    | 85.0    | 0.0   |                           | 0     | 2026-01-01 14:46:56
-7    | AUA00690        | Anua            | Heartleaf 70% + Hyaluron So... | Face     | szt   | 1.0    | Notino   | 16.15   | 19.0    | 0.0   | z kodem winter            | 1     | 2026-01-01 14:46:54
-9    | ANP02021        | Antipodes       | Avocado Pear Collagen-Boost... | Face     | ml    | 15.0   | Notino   | 60.4    | 60.4    | 5.0   |                           | 0     | 2026-01-01 14:46:51
-15   | ACM00001        | ACM             | Vitix                          | Face     | ml    | 50.0   | Notino   | 166.9   | 166.9   | 5.0   |                           | 0     | 2026-01-01 14:46:49
-13   | ADI05685        | Adidas          | UEFA Champions League Goal     | Face     | ml    | 100.0  | Notino   | 38.3    | 38.3    | 5.0   |                           | 0     | 2026-01-01 14:46:48
-6    | AUA00676        | Anua            | Rice 7 Ceramide Hydrating B... | Face     | ml    | 50.0   | Notino   | 110.0   | 116.0   | 0.0   | promocja                  | 1     | 2026-01-01 14:46:46
-19   | AUA00636        | Anua            | Heartleaf Quercetinol Pore ... | Face     | ml    | 150.0  | Notino   | 53.97   | 59.9    | 5.0   | z kodem winter            | 1     | 2026-01-01 14:46:44
-17   | ADE02092        | A-Derma         | Exomega Control Repairing E... | Face     | ml    | 200.0  | Notino   | 39.1    | 41.2    | 0.0   | promocja                  | 1     | 2026-01-01 14:46:43
-12   | ACM00007        | ACM             | D�piwhite Advanced             | Face     | ml    | 40.0   | Notino   | 117.3   | 117.3   | 5.0   |                           | 0     | 2026-01-01 14:46:35
-14   | ADE02065        | A-Derma         | Biology AC                     | Face     | ml    | 40.0   | Notino   | 84.0    | 84.0    | 0.0   |                           | 0     | 2026-01-01 14:46:34
-10   | AUA00632        | Anua            | Heartleaf Pore Control Clea... | Face     | ml    | 200.0  | Notino   | 78.11   | 85.0    | 4.4   | z kodem winter            | 1     | 2026-01-01 14:46:30
-2    | AAC04343        | AA Cosmetics    | LAAB 100% Centella B12         | Face     | ml    | 150.0  | Notino   | 23.0    | 23.0    | 0.0   |                           | 0     | 2026-01-01 14:46:29
-29   | BEJ00630        | Anua            | Heartleaf 77% Soothing Toner   | Face     | ml    | 250.0  | Notino   | 90.18   | 106.1   | 5.0   | z kodem winter            | 1     | 2026-01-01 14:33:22
-22   | AUA00631        | Anua            | Heartleaf 77% Soothing Toner   | Face     | ml    | 500.0  | Notino   | 178.0   | 189.0   | 5.0   |                           | 0     | 2026-01-01 14:33:16
-28   | ADE02086        | A-Derma         | Biology AC                     | Face     | ml    | 100.0  | Notino   | 33.2    | 33.2    | 5.0   |                           | 0     | 2026-01-01 14:33:08
-27   | ADE02061        | A-Derma         | Biology AC                     | Face     | ml    | 200.0  | Notino   | 85.0    | 85.0    | 5.0   |                           | 0     | 2026-01-01 14:33:07
-21   | ADE02062        | A-Derma         | Biology AC                     | Face     | ml    | 400.0  | Notino   | 100.0   | 100.0   | 5.0   |                           | 0     | 2026-01-01 14:33:06
-17   | ADE02092        | A-Derma         | Exomega Control Repairing E... | Face     | ml    | 200.0  | Notino   | 39.1    | 41.2    | 0.0   |                           | 0     | 2026-01-01 14:33:04
-26   | ADE02093        | A-Derma         | Exomega Control Repairing E... | Face     | ml    | 400.0  | Notino   | 93.6    | 93.6    | 0.0   |                           | 0     | 2026-01-01 14:33:02
-4    | ADE02063        | A-Derma         | Biology AC                     | Face     | ml    | 200.0  | Notino   | 85.0    | 85.0    | 0.0   |                           | 0     | 2026-01-01 14:33:00
-25   | ADE02064        | A-Derma         | Biology AC                     | Face     | ml    | 400.0  | Notino   | 100.0   | 100.0   | 0.0   |                           | 0     | 2026-01-01 14:32:59
-24   | ADE02072        | A-Derma         | Dermalibour+ Barrier           | Face     | ml    | 50.0   | Notino   | 107.2   | 107.2   | 0.0   |                           | 0     | 2026-01-01 14:32:57
-3    | ADE02073        | A-Derma         | Dermalibour+ Barrier           | Face     | ml    | 100.0  | Notino   | 80.8    | 80.8    | 0.0   |                           | 0     | 2026-01-01 14:32:54
-23   | AUA00641        | Anua            | Peach 70% Niacin Serum         | Face     | ml    | 30.0   | Notino   | 97.75   | 108.0   | 5.0   | z kodem winter            | 1     | 2026-01-01 14:32:52
-22   | AUA00631        | Anua            | Heartleaf 77% Soothing Toner   | Face     | ml    | 500.0  | Notino   | 178.0   | 189.0   | 5.0   |                           | 0     | 2026-01-01 14:32:50
-21   | ADE02062        | A-Derma         | Biology AC                     | Face     | ml    | 400.0  | Notino   | 100.0   | 100.0   | 5.0   |                           | 0     | 2026-01-01 14:32:49
-20   | ADI05828        | Adidas          | UEFA Champions League Pro P... | Face     | ml    | 100.0  | Notino   | 54.0    | 54.0    | 0.0   |                           | 0     | 2026-01-01 14:32:47
-19   | AUA00636        | Anua            | Heartleaf Quercetinol Pore ... | Face     | ml    | 150.0  | Notino   | 53.97   | 59.9    | 5.0   | z kodem winter            | 1     | 2026-01-01 14:32:45
-18   | AAC04355        | AA Cosmetics    | AA Cosmetics                   | Face     | ml    | 200.0  | Notino   | 28.3    | 30.0    | 0.0   |                           | 0     | 2026-01-01 14:32:44
-17   | ADE02092        | A-Derma         | Exomega Control Repairing E... | Face     | ml    | 200.0  | Notino   | 39.1    | 41.2    | 0.0   |                           | 0     | 2026-01-01 14:32:42
-16   | AUA00677        | Anua            | Rice Enzyme Brightening Cle... | Face     | g     | 40.0   | Notino   | 86.27   | 96.0    | 0.0   | z kodem winter            | 1     | 2026-01-01 14:32:40
-15   | ACM00001        | ACM             | Vitix                          | Face     | ml    | 50.0   | Notino   | 166.9   | 166.9   | 5.0   |                           | 0     | 2026-01-01 14:32:37
-14   | ADE02065        | A-Derma         | Biology AC                     | Face     | ml    | 40.0   | Notino   | 84.0    | 84.0    | 0.0   |                           | 0     | 2026-01-01 14:32:35
-13   | ADI05685        | Adidas          | UEFA Champions League Goal     | Face     | ml    | 100.0  | Notino   | 38.3    | 38.3    | 5.0   |                           | 0     | 2026-01-01 14:32:33
-12   | ACM00007        | ACM             | D�piwhite Advanced             | Face     | ml    | 40.0   | Notino   | 117.3   | 117.3   | 5.0   |                           | 0     | 2026-01-01 14:32:32
-11   | AUA00689        | Anua            | Peach 70% Niacin Brightenin... | Face     | szt   | 1.0    | Notino   | 18.1    | 19.0    | 0.0   | z kodem winter            | 1     | 2026-01-01 14:32:31
-10   | AUA00632        | Anua            | Heartleaf Pore Control Clea... | Face     | ml    | 200.0  | Notino   | 78.11   | 85.0    | 4.4   | z kodem winter            | 1     | 2026-01-01 14:32:29
-9    | ANP02021        | Antipodes       | Avocado Pear Collagen-Boost... | Face     | ml    | 15.0   | Notino   | 60.4    | 60.4    | 5.0   |                           | 0     | 2026-01-01 14:32:27
-8    | AAC04360        | AA Cosmetics    | LAAB 100% Centella B12         | Face     | g     | 15.0   | Notino   | 30.0    | 30.0    | 0.0   |                           | 0     | 2026-01-01 14:32:25
-7    | AUA00690        | Anua            | Heartleaf 70% + Hyaluron So... | Face     | szt   | 1.0    | Notino   | 16.15   | 19.0    | 0.0   | z kodem winter            | 1     | 2026-01-01 14:32:22
-6    | AUA00676        | Anua            | Rice 7 Ceramide Hydrating B... | Face     | ml    | 50.0   | Notino   | 110.0   | 116.0   | 0.0   |                           | 0     | 2026-01-01 14:32:20
-5    | AAC04348        | AA Cosmetics    | LAAB 100% Centella B12         | Face     | ml    | 200.0  | Notino   | 27.0    | 27.0    | 0.0   |                           | 0     | 2026-01-01 14:32:19
-4    | ADE02063        | A-Derma         | Biology AC                     | Face     | ml    | 200.0  | Notino   | 85.0    | 85.0    | 0.0   |                           | 0     | 2026-01-01 14:32:18
-3    | ADE02073        | A-Derma         | Dermalibour+ Barrier           | Face     | ml    | 100.0  | Notino   | 80.8    | 80.8    | 0.0   |                           | 0     | 2026-01-01 14:32:16
-2    | AAC04343        | AA Cosmetics    | LAAB 100% Centella B12         | Face     | ml    | 150.0  | Notino   | 23.0    | 23.0    | 0.0   |                           | 0     | 2026-01-01 14:32:14
-1    | AUA00647        | Anua            | Niacinamide 10% + TXA 4% Da... | Face     | ml    | 30.0   | Notino   | 95.2    | 111.9   | 5.0   | z kodem winter            | 1     | 2026-01-01 14:32:13
+23   | ADE02092        | A-Derma         | Exomega Control Repairing E... | Kosmetyki dla dzieci do ciała | ml    | 200.0  | Notino   | 39.1    | 41.2    | 0.0   | promocja                  | 1     | 2026-01-01 15:19:22
+29   | ADE02093        | A-Derma         | Exomega Control Repairing E... | Kosmetyki dla dzieci do ciała | ml    | 400.0  | Notino   | 93.6    | 93.6    | 0.0   |                           | 0     | 2026-01-01 15:19:21
+28   | ADE02086        | A-Derma         | Biology AC                     | Oczyszczenie skóry | ml    | 100.0  | Notino   | 33.2    | 33.2    | 5.0   |                           | 0     | 2026-01-01 15:19:19
+27   | ADE02061        | A-Derma         | Biology AC                     | Oczyszczenie skóry | ml    | 200.0  | Notino   | 85.0    | 85.0    | 5.0   |                           | 0     | 2026-01-01 15:19:18
+21   | ADE02062        | A-Derma         | Biology AC                     | Oczyszczenie skóry | ml    | 400.0  | Notino   | 100.0   | 100.0   | 5.0   |                           | 0     | 2026-01-01 15:19:16
+20   | ADE02063        | A-Derma         | Biology AC                     | płyny micelarne | ml    | 200.0  | Notino   | 85.0    | 85.0    | 0.0   |                           | 0     | 2026-01-01 15:19:15
+26   | ADE02064        | A-Derma         | Biology AC                     | płyny micelarne | ml    | 400.0  | Notino   | 100.0   | 100.0   | 0.0   |                           | 0     | 2026-01-01 15:19:13
+25   | ADE02072        | A-Derma         | Dermalibour+ Barrier           | Kremy do ciała | ml    | 50.0   | Notino   | 107.2   | 107.2   | 0.0   |                           | 0     | 2026-01-01 15:19:11
+15   | ADE02073        | A-Derma         | Dermalibour+ Barrier           | Kremy do ciała | ml    | 100.0  | Notino   | 80.8    | 80.8    | 0.0   |                           | 0     | 2026-01-01 15:19:10
+24   | BEJ00630        | Anua            | Heartleaf 77% Soothing Toner   | Toniki do twarzy | ml    | 250.0  | Notino   | 90.18   | 106.1   | 5.0   | z kodem winter            | 1     | 2026-01-01 15:19:08
+3    | AUA00631        | Anua            | Heartleaf 77% Soothing Toner   | Toniki do twarzy | ml    | 500.0  | Notino   | 178.0   | 189.0   | 5.0   | promocja                  | 1     | 2026-01-01 15:19:07
+23   | ADE02092        | A-Derma         | Exomega Control Repairing E... | Kosmetyki dla dzieci do ciała | ml    | 200.0  | Notino   | 39.1    | 41.2    | 0.0   | promocja                  | 1     | 2026-01-01 15:19:05
+22   | ADE02065        | A-Derma         | Biology AC                     | Kremy do twarzy | ml    | 40.0   | Notino   | 84.0    | 84.0    | 0.0   |                           | 0     | 2026-01-01 15:19:03
+21   | ADE02062        | A-Derma         | Biology AC                     | Oczyszczenie skóry | ml    | 400.0  | Notino   | 100.0   | 100.0   | 5.0   |                           | 0     | 2026-01-01 15:19:02
+20   | ADE02063        | A-Derma         | Biology AC                     | płyny micelarne | ml    | 200.0  | Notino   | 85.0    | 85.0    | 0.0   |                           | 0     | 2026-01-01 15:19:00
+19   | AUA00641        | Anua            | Peach 70% Niacin Serum         | Sera do twarzy | ml    | 30.0   | Notino   | 97.75   | 108.0   | 5.0   | z kodem winter            | 1     | 2026-01-01 15:18:59
+18   | AUA00632        | Anua            | Heartleaf Pore Control Clea... | Preparaty do demakijażu | ml    | 200.0  | Notino   | 78.11   | 85.0    | 4.4   | z kodem winter            | 1     | 2026-01-01 15:18:57
+17   | AUA00636        | Anua            | Heartleaf Quercetinol Pore ... | Oczyszczenie skóry | ml    | 150.0  | Notino   | 53.97   | 59.9    | 5.0   | z kodem winter            | 1     | 2026-01-01 15:18:56
+16   | AAC04348        | AA Cosmetics    | LAAB 100% Centella B12         | Toniki do twarzy | ml    | 200.0  | Notino   | 27.0    | 27.0    | 0.0   |                           | 0     | 2026-01-01 15:18:54
+15   | ADE02073        | A-Derma         | Dermalibour+ Barrier           | Kremy do ciała | ml    | 100.0  | Notino   | 80.8    | 80.8    | 0.0   |                           | 0     | 2026-01-01 15:18:52
+14   | AUA00676        | Anua            | Rice 7 Ceramide Hydrating B... | Sera do twarzy | ml    | 50.0   | Notino   | 110.0   | 116.0   | 0.0   | promocja                  | 1     | 2026-01-01 15:18:51
+13   | AUA00647        | Anua            | Niacinamide 10% + TXA 4% Da... | Sera do twarzy | ml    | 30.0   | Notino   | 95.2    | 111.9   | 5.0   | z kodem winter            | 1     | 2026-01-01 15:18:49
+12   | AAC04343        | AA Cosmetics    | LAAB 100% Centella B12         | Oczyszczenie skóry | ml    | 150.0  | Notino   | 23.0    | 23.0    | 0.0   |                           | 0     | 2026-01-01 15:18:48
+11   | ANP02021        | Antipodes       | Avocado Pear Collagen-Boost... | Kremy do twarzy | ml    | 15.0   | Notino   | 60.4    | 60.4    | 5.0   |                           | 0     | 2026-01-01 15:18:46
+10   | ADI05685        | Adidas          | UEFA Champions League Goal     | Produkty po goleniu | ml    | 100.0  | Notino   | 38.3    | 38.3    | 5.0   |                           | 0     | 2026-01-01 15:18:45
+9    | AUA00689        | Anua            | Peach 70% Niacin Brightenin... | Maseczki do twarzy | szt   | 1.0    | Notino   | 18.1    | 19.0    | 0.0   | z kodem winter            | 1     | 2026-01-01 15:18:43
+8    | ACM00001        | ACM             | Vitix                          | pielęgnacja miejscowa | ml    | 50.0   | Notino   | 166.9   | 166.9   | 5.0   |                           | 0     | 2026-01-01 15:18:41
+7    | AAC04360        | AA Cosmetics    | LAAB 100% Centella B12         | Maseczki do ust | g     | 15.0   | Notino   | 30.0    | 30.0    | 0.0   |                           | 0     | 2026-01-01 15:18:40
+6    | AUA00690        | Anua            | Heartleaf 70% + Hyaluron So... | Maseczki do twarzy | szt   | 1.0    | Notino   | 16.15   | 19.0    | 0.0   | z kodem winter            | 1     | 2026-01-01 15:18:38
+5    | AAC04355        | AA Cosmetics    | AA Cosmetics                   | Oczyszczenie skóry | ml    | 200.0  | Notino   | 28.3    | 30.0    | 0.0   | promocja                  | 1     | 2026-01-01 15:18:37
+4    | ADI05828        | Adidas          | UEFA Champions League Pro P... | Produkty po goleniu | ml    | 100.0  | Notino   | 54.0    | 54.0    | 0.0   |                           | 0     | 2026-01-01 15:18:35
+3    | AUA00631        | Anua            | Heartleaf 77% Soothing Toner   | Toniki do twarzy | ml    | 500.0  | Notino   | 178.0   | 189.0   | 5.0   | promocja                  | 1     | 2026-01-01 15:18:33
+2    | AUA00677        | Anua            | Rice Enzyme Brightening Cle... | Oczyszczenie skóry | g     | 40.0   | Notino   | 86.27   | 96.0    | 0.0   | z kodem winter            | 1     | 2026-01-01 15:18:32
+1    | ACM00007        | ACM             | Dépiwhite Advanced             | Kremy do twarzy | ml    | 40.0   | Notino   | 117.3   | 117.3   | 5.0   |                           | 0     | 2026-01-01 15:18:30

@@ -352,6 +352,7 @@ class NotinoScraper(BaseScraper):
     def _handle_single_variant(self, soup, brand, name, last_30d_price, url, ratings, product_code=None):
         """Scenario B: Parse single selected variant."""
         try:
+            self.log.debug(f"Parsing variant details for URL: {url}")
             promo_desc: Optional[str] = None
             raw_price: float = 0.0
 
@@ -366,7 +367,6 @@ class NotinoScraper(BaseScraper):
                     if v > 0:
                         volume, unit = v, u
                         break
-
             if volume == 0:
                 wrapper = soup.find(id="pdSelectedVariant")
                 if wrapper:
@@ -374,9 +374,14 @@ class NotinoScraper(BaseScraper):
                     target = wrapper.find(string=re.compile(r"\d+\s*[a-zA-Z]+"))
                     if target:
                         volume, unit = self._parse_volume(target.strip())
+            
+            self.log.debug(f"Extracted volume: {volume} {unit}")
 
             # 2. Price extraction
             pd_price_wrapper = soup.find(attrs={"data-testid": "pd-price-wrapper"})
+            if pd_price_wrapper:
+                self.log.debug("Found pd-price-wrapper")
+            
             # Try to find specific voucher/promo price block
             # Look for 'z kodem' only within relevant price containers to avoid footer false positives
             voucher_indicator = None
@@ -414,6 +419,7 @@ class NotinoScraper(BaseScraper):
                         code_name = code_span.get_text(strip=True) if code_span else None
                         if code_name:
                             promo_desc = f"z kodem {code_name}"
+                            self.log.debug(f"Found voucher code: {code_name}")
 
             # Priority 2: Use id="pd-price"
             if raw_price == 0:
@@ -448,10 +454,13 @@ class NotinoScraper(BaseScraper):
                 
                 # Strategy: Go up from price_wrapper to find the container that holds both price and promo text.
                 # The user provided example shows they are close siblings/cousins.
+                # Strategy: Go up from price_wrapper to find the container that holds both price and promo text.
+                # The user provided example shows they are close siblings/cousins.
                 if pd_price_wrapper:
+                    self.log.debug("Checking parent containers for promo text...")
                     curr = pd_price_wrapper
                     # Traverse up to 4 levels to find a common parent container
-                    for _ in range(4):
+                    for i in range(4):
                         curr = curr.find_parent("div")
                         if not curr:
                             break
@@ -460,6 +469,7 @@ class NotinoScraper(BaseScraper):
                         # We use a regex search on the clean text of this container
                         if curr.find(string=re.compile("Promocja ograniczona czasowo", re.I)):
                             promo_desc = "promocja"
+                            self.log.debug(f"Found 'Promocja ograniczona czasowo' at parent level {i+1}")
                             break
                             
             # 3. Save - Use Product Code as EAN if found, else fallback to URL proxy
@@ -469,11 +479,25 @@ class NotinoScraper(BaseScraper):
             if last_30d_price <= 0:
                 last_30d_price = raw_price
 
+            # Category extraction from breadcrumbs
+            category = "Unknown" # Default
+            breadcrumbs = soup.find("div", {"data-testid": "breadcrumb-wrapper"})
+            if breadcrumbs:
+                links = breadcrumbs.find_all("a")
+                # Exclude the first link if it's the home icon (usually has data-order="0" or just check length)
+                # The user wants the absolute last <a> element's text.
+                if len(links) > 1:
+                    last_link = links[-1]
+                    cat_text = last_link.get_text(strip=True)
+                    if cat_text:
+                        category = cat_text
+                        self.log.debug(f"Extracted category: {category}")
+
             self._save_to_db(
                 ean=final_ean,
                 brand=brand,
                 name=name,
-                category="Face",
+                category=category,
                 unit=unit,
                 volume=volume,
                 price=raw_price,
@@ -524,6 +548,7 @@ class NotinoScraper(BaseScraper):
                 desc=desc,
                 is_promo=bool(desc) and desc != "Standard",
             )
+            self.log.debug(f"DB Push: EAN={ean}, Price={price}, Promo={desc}, Min30={last_30d_price}")
             self.log.info(f"Saved: {name} | {price} PLN (Min: {last_30d_price})")
 
         except Exception as e:

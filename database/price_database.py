@@ -12,6 +12,7 @@ class PriceDatabase:
         # Enabling foreign_keys is crucial in SQLite
         conn = sqlite3.connect(self.db_name)
         conn.execute("PRAGMA foreign_keys = ON;")
+        conn.execute("PRAGMA encoding = 'UTF-8';")
         return conn
 
     def init_db(self):
